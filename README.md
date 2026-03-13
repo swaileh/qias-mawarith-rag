@@ -29,7 +29,6 @@ A complete RAG (Retrieval-Augmented Generation) system for the QIAS 2026 shared 
 
 2. **Open the notebook**:
    - Use `notebooks/QIAS_RAG_HF.ipynb` (HuggingFace version)
-   - Or `notebooks/QIAS_RAG_Colab.ipynb` (updated)
 
 3. **Set GPU runtime**:
    - Runtime → Change runtime type → A100 GPU (or T4)
@@ -249,7 +248,8 @@ This project is licensed under the **Creative Commons Attribution-NonCommercial 
 
 ## Contact
 
-
+Wassim Swaileh
+web page: https://swaileh.github.io/index.html
 ---
 
-**Note**: This version uses HuggingFace Transformers directly instead of Ollama for better compatibility and easier setup in Google Colab.
+
