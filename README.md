@@ -13,6 +13,31 @@ A complete RAG (Retrieval-Augmented Generation) system for the QIAS 2026 shared 
 - **Thinking mode** for step-by-step reasoning
 - **MIR-E evaluation** framework support
 
+## Pipeline Overview
+
+The system runs in two modes: **zero-shot inference** (out of the box, no training) and optional **training / fine-tuning** to improve performance.
+
+### Zero-shot inference
+
+No model training is required. The pipeline (as in `notebooks/QIAS_RAG_HF.ipynb`):
+
+1. **Setup** — Install dependencies, check GPU, (on Colab) mount Drive and set HuggingFace auth.
+2. **Initialize pipeline** — Load `config/rag_config.yaml`, load the embedding model (e.g. `paraphrase-multilingual-mpnet-base-v2`), and load Qwen3.5-9B from HuggingFace with 4-bit quantization and thinking mode enabled.
+3. **Build knowledge base** — From Arabic PDFs in `data/pdfs/`: extract text, chunk (size/overlap in config), embed with the sentence model, and store in ChromaDB.
+4. **Query** — For each question: hybrid retrieval (semantic + BM25) → optional rerank → prompt built with retrieved context and few-shot examples → Qwen3.5 generates with `<think>...</think>` and `<answer>...</answer>` → output is parsed for thinking and final answer.
+
+So zero-shot means: use the base Qwen3.5 model as-is, with no fine-tuning; only the RAG context and prompts are tailored to Islamic inheritance (علم المواريث).
+
+### Training and fine-tuning strategies
+
+Two complementary approaches (see `docs/TRAINING_GUIDE.md` for full detail):
+
+- **RAG system training (recommended, no fine-tuning)**  
+  The model weights are not changed. A **feedback loop** analyzes prediction errors, suggests changes to prompts, retrieval (e.g. `top_k`, semantic/keyword weights), and the knowledge base. You then iterate: re-run evaluation, adjust config or add PDFs, and repeat until quality is satisfactory. This is the main lever for improvement before considering fine-tuning.
+
+- **Model fine-tuning (optional)**  
+  Consider only if RAG improvements are not enough (e.g. you need very high accuracy and have GPU capacity). The guide describes **LoRA fine-tuning** of Qwen on the QIAS dataset: prepare training data (e.g. via `src.training.fine_tune`), generate a training script, install `unsloth` and `trl`, run training, then point the RAG config at the fine-tuned adapter. Fine-tuning is optional; most users can rely on zero-shot + RAG system training.
+
 ## Quick Start
 
 ### Google Colab (Recommended)
