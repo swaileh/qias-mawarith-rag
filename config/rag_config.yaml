@@ -1,0 +1,66 @@
+colab:
+  data_path_in_drive: MyDrive/QIAS_RAG/data
+  google_drive_mount: /content/drive
+  results_path_in_drive: MyDrive/QIAS_RAG/results
+evaluation:
+  dataset_path: ../qias_shared_task_2026/data/jsonl/mawarith
+  mir_e_evaluation: true
+  output_directory: ./results
+model:
+  client_type: huggingface
+  context_window: 32768
+  enable_thinking: true
+  hf_model_name: Qwen/Qwen3.5-9B
+  max_new_tokens: 1024
+  name: Qwen3.5-9B-HF
+  temperature: 0.1
+  repetition_penalty: 1.15
+  top_p: 0.95
+pdf:
+  arabic_text_processing: true
+  extract_images: false
+  extract_tables: true
+  source_directory: ./data/pdfs
+  supported_formats:
+  - .pdf
+prompt:
+  few_shot_examples: 3
+  include_retrieved_context: true
+  max_context_length: 1024
+  system_message: 'أنت خبير في علم المواريث (الفرائض) في الشريعة الإسلامية.
+
+    يجب أن تقدم إجابات منظمة مع تفكير تفصيلي خطوة بخطوة باللغة العربية.
+
+    استخدم وسوم <think>...</think> لعملية التفكير ووسوم <answer>...</answer> للإجابة
+    النهائية.
+
+    '
+retrieval:
+  hybrid_search: true
+  keyword_weight: 0.3
+  min_relevance_score: 0.5
+  rerank: true
+  reranker_model: cross-encoder/ms-marco-MiniLM-L-6-v2
+  semantic_weight: 0.7
+  top_k: 5
+training:
+  error_analysis: true
+  feedback_loop_enabled: true
+  improvement_iterations: 3
+vector_store:
+  chunk_overlap: 128
+  chunk_size: 512
+  collection_name: qias_islamic_law
+  distance_metric: cosine
+  embedding_model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+  persist_directory: ./data/vector_db
+  type: chromadb
+web_search:
+  api_key: ''
+  enabled: false
+  max_results: 3
+  search_language: ar
+evaluation:
+  enable_relevance_evaluation: true
+  min_relevance_threshold: 0.5
+  evaluation_output_dir: ./evaluation_results
