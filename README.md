@@ -248,8 +248,8 @@ This project is licensed under the **Creative Commons Attribution-NonCommercial 
 
 ## Contact
 
-Wassim Swaileh
-web page: https://swaileh.github.io/index.html
+**Wassim Swaileh**
+- `web page:` https://swaileh.github.io/index.html
 ---
 
 
