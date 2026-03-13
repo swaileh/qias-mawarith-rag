@@ -22,8 +22,9 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Virtual Environment (never commit - recreate with pip install -r requirements.txt)
 venv/
+.venv/
 ENV/
 env/
 
@@ -41,10 +42,12 @@ data/cache/
 *.db
 *.sqlite
 
-# Results and outputs
+# Results and outputs (never commit evaluation/reports to main)
 results/
 output/
 outputs/
+outputs/evaluation/
+outputs/reports/
 *.log
 
 # Jupyter Notebooks
