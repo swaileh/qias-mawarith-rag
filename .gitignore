@@ -1,6 +1,7 @@
-# .gitignore for QIAS RAG System
+# .gitignore for QIAS Mawarith RAG
+# https://arxiv.org/abs/2603.24012
 
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -18,55 +19,61 @@ parts/
 sdist/
 var/
 wheels/
+.pytest_cache/
+.ruff_cache/
 *.egg-info/
 .installed.cfg
 *.egg
 
-# Virtual Environment (never commit - recreate with pip install -r requirements.txt)
+# ── Virtual Environment ──────────────────────────────────────────────────────
+# Recreate with: pip install -e ".[gpu,dev]"
 venv/
 .venv/
 ENV/
 env/
 
-# IDEs
+# ── IDEs ─────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Data files
+# ── Data & Knowledge Base ────────────────────────────────────────────────────
 data/pdfs/*.pdf
 data/vector_db/
 data/cache/
+data/train/*.jsonl
 *.db
 *.sqlite
+*.pkl
+*.pickle
 
-# Results and outputs (never commit evaluation/reports to main)
+# ── Results & Outputs ────────────────────────────────────────────────────────
 results/
 output/
 outputs/
-outputs/evaluation/
-outputs/reports/
+.benchmarks/
 *.log
+*.jsonl
 
-# Jupyter Notebooks
+# ── Jupyter Notebooks ────────────────────────────────────────────────────────
 .ipynb_checkpoints/
-*.ipynb_checkpoints
 
-# API Keys and Secrets
+# ── API Keys & Secrets ──────────────────────────────────────────────────────
 .env
 *.key
 config/*local.yaml
 
-# OS
+# ── OS ───────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Large model files
+# ── Large Model Files ────────────────────────────────────────────────────────
 *.bin
 *.gguf
 *.safetensors
 
-# Documentation (local / generated; not pushed)
-docs/
+# ── HuggingFace / Model Cache ───────────────────────────────────────────────
+.cache/
+models/
