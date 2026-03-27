@@ -4,7 +4,6 @@ for enhancing the QIAS train set distribution.
 """
 
 import requests
-import os
 from pathlib import Path
 
 # PDF URLs to download - focused on covering Awl/Radd cases and complex inheritance scenarios
@@ -70,7 +69,7 @@ def download_pdf(url, output_path, description):
 
 def main():
     # Output directory
-    output_dir = Path("C:/Users/Wassim-Swaileh-SW07/projects/Qias/qias_rag_thinking/data/pdfs")
+    output_dir = Path(__file__).resolve().parent.parent / "data" / "pdfs"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 70)

@@ -173,7 +173,7 @@ def generate_comprehensive_dev_report(dev_data: List[Dict[str, Any]]) -> str:
     report.append("TARGET COMPREHENSIVE QIAS DEV SET RAG RELEVANCE EVALUATION REPORT")
     report.append("="*120)
     report.append(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    report.append(f"Dataset: QIAS 2025 Almawarith Dev Set")
+    report.append("Dataset: QIAS 2025 Almawarith Dev Set")
     report.append(f"Total Questions Analyzed: {len(dev_data)}")
     report.append("")
 
@@ -420,7 +420,7 @@ def main():
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write(report)
 
-    print(f"\n[SUCCESS] Complete evaluation finished!")
+    print("\n[SUCCESS] Complete evaluation finished!")
     print(f"[FILES] Report: {report_file}")
     print(f"[FILES] Detailed data: {detailed_file}")
 

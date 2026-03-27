@@ -6,11 +6,9 @@ Comprehensive analysis of RAG retrieval quality across different source configur
 
 import json
 import numpy as np
-from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List
 import re
-from collections import defaultdict
 
 class MultiSourceRAGEvaluator:
     """Evaluate RAG performance across different source configurations"""
@@ -370,7 +368,7 @@ class MultiSourceRAGEvaluator:
             'recommendations': [
                 f"Use {self.source_configs[best_overall]['name']} as the default configuration for maximum retrieval quality",
                 f"Consider {self.source_configs[best_overall]['name']} for complex inheritance law questions",
-                f"Use combined sources when maximum coverage is needed over precision",
+                "Use combined sources when maximum coverage is needed over precision",
                 "Implement dynamic source selection based on query characteristics"
             ]
         }
@@ -622,7 +620,7 @@ def main():
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write(report)
 
-    print(f"\n[CHECK] Multi-source evaluation complete!")
+    print("\n[CHECK] Multi-source evaluation complete!")
     print(f"[CHART] Analyzed {len(evaluation_results['results_by_source']['pdf_only'])} questions across 3 source configurations")
     print(f"[FOLDER] Detailed data: {detailed_file}")
     print(f"[FOLDER] Report: {report_file}")

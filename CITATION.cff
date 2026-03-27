@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+title: "CVPD at QIAS 2026: RAG-Guided LLM Reasoning for Al-Mawarith Share Computation and Heir Allocation"
+message: "If you use this software, please cite our paper."
+type: software
+authors:
+  - family-names: Swaileh
+    given-names: Wassim
+  - family-names: Zighem
+    given-names: Mohammed-En-Nadhir
+  - family-names: Telli
+    given-names: Hichem
+  - family-names: Bekhouche
+    given-names: Salah Eddine
+  - family-names: Sellam
+    given-names: Abdellah Zakaria
+  - family-names: Dornaika
+    given-names: Fadi
+  - family-names: Kotzinos
+    given-names: Dimitrios
+url: "https://github.com/swaileh/qias-mawarith-rag"
+repository-code: "https://github.com/swaileh/qias-mawarith-rag"
+license: CC-BY-NC-4.0
+preferred-citation:
+  type: conference-paper
+  title: "CVPD at QIAS 2026: RAG-Guided LLM Reasoning for Al-Mawarith Share Computation and Heir Allocation"
+  authors:
+    - family-names: Swaileh
+      given-names: Wassim
+    - family-names: Zighem
+      given-names: Mohammed-En-Nadhir
+    - family-names: Telli
+      given-names: Hichem
+    - family-names: Bekhouche
+      given-names: Salah Eddine
+    - family-names: Sellam
+      given-names: Abdellah Zakaria
+    - family-names: Dornaika
+      given-names: Fadi
+    - family-names: Kotzinos
+      given-names: Dimitrios
+  year: 2026
+  url: "https://arxiv.org/abs/2603.24012"

@@ -1,0 +1,142 @@
+# QIAS 2026 - Complete Fine-tuning Pipeline
+
+## Model: Qwen3-4B-Thinking-2507
+A native reasoning model with <think> and <answer> tags.
+
+---
+
+## Phase 1: Synthetic Data Generation ✅
+
+```bash
+# Generate synthetic dataset (109,998 examples)
+python datagen/synthetic_generator.py
+
+# Validate (100% accuracy)
+python3 datagen/validator.py datagen/output/synthetic_v2/
+```
+
+## Phase 2: Prepare Training Data ✅
+
+```bash
+# Convert to chat format
+python3 training/prepare_data.py
+# Creates: training/data/train.jsonl (104,498 examples)
+# Creates: training/data/val.jsonl (5,500 examples)
+```
+
+---
+
+## Phase 3: Install Dependencies
+
+```bash
+# Install Unsloth (2x faster, 70% less memory)
+pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+pip install --no-deps trl peft accelerate bitsandbytes
+```
+
+---
+
+## Phase 4: Training Options
+
+### Option A: SFT Training (Supervised Fine-Tuning)
+Standard training on input-output pairs:
+
+```bash
+python3 training/train_unsloth.py
+# Options:
+python3 training/train_unsloth.py --epochs 3 --batch-size 2
+```
+
+### Option B: GRPO Training (Recommended) 🎯
+Reinforcement Learning with custom reward functions:
+
+```bash
+python3 training/train_grpo.py
+# Options:
+python3 training/train_grpo.py --max-steps 500 --num-generations 4
+```
+
+**GRPO Reward Functions:**
+1. **Format Compliance** (+2.5 max): Checks <think> and <answer> tags
+2. **Thinking Quality** (+5.0 max): Analyzes Fiqh keywords in reasoning
+   - الحجب (blocking), الفرض (fixed share), التعصيب (residuary)
+   - العول (increase), الرد (return)
+3. **JSON Validity** (+4.0 max): Verifies answer structure
+4. **Calculator Verification** (+5.0 max): Uses symbolic calculator
+
+---
+
+## Phase 5: Test & Evaluate
+
+```bash
+# Test with sample question
+python3 training/inference_unsloth.py
+
+# Interactive mode
+python3 training/inference_unsloth.py --interactive
+
+# Evaluate on dev set
+python3 training/inference_unsloth.py --evaluate --max-samples 50
+```
+
+---
+
+## Model Comparison
+
+| Model | Size | Reasoning | VRAM (4-bit) | Training |
+|-------|------|-----------|--------------|----------|
+| Qwen2.5-7B-Instruct | 7B | CoT prompting | ~8GB | SFT |
+| **Qwen3-4B-Thinking** | 4B | Native <think> | ~5GB | SFT + GRPO |
+
+---
+
+## Training Data Format
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "أنت خبير في علم المواريث..."},
+    {"role": "user", "content": "توفي شخص وخلّف: زوجة وابن..."},
+    {"role": "assistant", "content": "<think>نبدأ بتحليل...</think>\n<answer>{...}</answer>"}
+  ]
+}
+```
+
+---
+
+## Qwen3-2507 Thinking Best Practices
+
+From Unsloth docs:
+- **temperature**: 0.6 (not 0.7 like Instruct)
+- **top_p**: 0.95
+- **top_k**: 20
+- **min_p**: 0.0
+- **max tokens**: 32,768 for most queries
+
+The default chat template adds <think> automatically, so you may see only a closing </think> tag in the output.
+
+---
+
+## Expected Training Times
+
+| Method | Time (RTX 3090) | Notes |
+|--------|-----------------|-------|
+| SFT (3 epochs) | ~8-12 hours | Basic fine-tuning |
+| GRPO (500 steps) | ~12-24 hours | Reward-based learning |
+| Combined SFT+GRPO | ~24-36 hours | Best results |
+
+---
+
+## Directory Structure
+
+```
+training/
+├── train_unsloth.py     # SFT training
+├── train_grpo.py        # GRPO training with rewards
+├── inference_unsloth.py # Testing and evaluation
+├── prepare_data.py      # Data preparation
+├── requirements.txt     # Dependencies
+└── data/
+    ├── train.jsonl      # Training examples
+    └── val.jsonl        # Validation examples
+```

@@ -1,280 +1,186 @@
-# QIAS 2026 RAG System with Qwen3.5
+# QIAS Mawarith RAG
 
-**Islamic Inheritance Reasoning with Retrieval Augmented Generation**
+**RAG-Guided LLM Reasoning for Al-Mawarith Share Computation and Heir Allocation**
 
-A complete RAG (Retrieval-Augmented Generation) system for the QIAS 2026 shared task, using Qwen3.5 via HuggingFace Transformers for Islamic inheritance law (علم المواريث) reasoning.
+[![Paper](https://img.shields.io/badge/arXiv-2603.24012-b31b1b.svg)](https://arxiv.org/abs/2603.24012)
+[![Rank](https://img.shields.io/badge/QIAS%202026-🏆%20Rank%201-gold.svg)](#)
+[![MIR-E](https://img.shields.io/badge/MIR--E-0.935-brightgreen.svg)](#)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
 
-## Features
+> **1st place** on the [QIAS 2026](https://sites.google.com/view/qias2026/) blind-test leaderboard for Islamic Inheritance Reasoning.
 
-- **Qwen3.5-9B-Instruct** via HuggingFace Transformers (no Ollama needed)
-- **4-bit quantization** for efficient GPU memory usage (~6.6GB)
-- **ChromaDB** vector store with Arabic embeddings
-- **Hybrid retrieval** (semantic + BM25 keyword search)
-- **Thinking mode** for step-by-step reasoning
-- **MIR-E evaluation** framework support
+---
 
-## Pipeline Overview
+## Overview
 
-The system runs in two modes: **zero-shot inference** (out of the box, no training) and optional **training / fine-tuning** to improve performance.
+A retrieval-augmented, schema-constrained pipeline for Islamic inheritance (Ilm al-Mawarith) reasoning. The system combines:
 
-### Zero-shot inference
+1. **Symbolic Calculator & Rule-Based Generator** (§3.2) — A deterministic inheritance calculator that generates ~100K synthetic training cases with full stage-wise reasoning traces.
 
-No model training is required. The pipeline (as in `notebooks/QIAS_RAG_HF.ipynb`):
+2. **Hybrid Retrieval with Cross-Encoder Reranking** (§3.3.1) — Dense semantic search + BM25 lexical search, fused via weighted Reciprocal Rank Fusion and reranked by a cross-encoder.
 
-1. **Setup** — Install dependencies, check GPU, (on Colab) mount Drive and set HuggingFace auth.
-2. **Initialize pipeline** — Load `config/rag_config.yaml`, load the embedding model (e.g. `paraphrase-multilingual-mpnet-base-v2`), and load Qwen3.5-9B from HuggingFace with 4-bit quantization and thinking mode enabled.
-3. **Build knowledge base** — From Arabic PDFs in `data/pdfs/`: extract text, chunk (size/overlap in config), embed with the sentence model, and store in ChromaDB.
-4. **Query** — For each question: hybrid retrieval (semantic + BM25) → optional rerank → prompt built with retrieved context and few-shot examples → Qwen3.5 generates with `<think>...</think>` and `<answer>...</answer>` → output is parsed for thinking and final answer.
-
-So zero-shot means: use the base Qwen3.5 model as-is, with no fine-tuning; only the RAG context and prompts are tailored to Islamic inheritance (علم المواريث).
-
-### Training and fine-tuning strategies
-
-Two complementary approaches (see `docs/TRAINING_GUIDE.md` for full detail):
-
-- **RAG system training (recommended, no fine-tuning)**  
-  The model weights are not changed. A **feedback loop** analyzes prediction errors, suggests changes to prompts, retrieval (e.g. `top_k`, semantic/keyword weights), and the knowledge base. You then iterate: re-run evaluation, adjust config or add PDFs, and repeat until quality is satisfactory. This is the main lever for improvement before considering fine-tuning.
-
-- **Model fine-tuning (optional)**  
-  Consider only if RAG improvements are not enough (e.g. you need very high accuracy and have GPU capacity). The guide describes **LoRA fine-tuning** of Qwen on the QIAS dataset: prepare training data (e.g. via `src.training.fine_tune`), generate a training script, install `unsloth` and `trl`, run training, then point the RAG config at the fine-tuned adapter. Fine-tuning is optional; most users can rely on zero-shot + RAG system training.
-
-## Quick Start
-
-### Google Colab (Recommended)
-
-1. **Upload project to Google Drive**:
-   ```
-   MyDrive/QIAS26/
-   └── qias_rag_thinking/
-       ├── src/
-       ├── config/
-       ├── notebooks/
-       └── data/pdfs/
-   ```
-
-2. **Open the notebook**:
-   - Use `notebooks/QIAS_RAG_HF.ipynb` (HuggingFace version)
-
-3. **Set GPU runtime**:
-   - Runtime → Change runtime type → A100 GPU (or T4)
-
-4. **Set up HuggingFace authentication** (optional but recommended):
-   - Get token from: https://huggingface.co/settings/tokens
-   - Add to Colab secrets: `HF_TOKEN` = your_token
-   - Or use `.env` file for local development
-
-5. **Run cells sequentially**:
-   - Install dependencies
-   - Mount Drive
-   - Authenticate with HuggingFace
-   - Initialize pipeline (downloads Qwen3.5 automatically)
-   - Run evaluation
-
-### Local Installation
-
-```bash
-# Clone repository
-git clone https://github.com/your-repo/qias_rag_thinking.git
-cd qias_rag_thinking
-
-# Set up HuggingFace authentication (recommended)
-cp .env.example .env
-# Edit .env and set HF_TOKEN=your_huggingface_token
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the pipeline
-python -m notebooks.QIAS_RAG_HF
-```
+3. **Constrained LLM Decoding & Validation** (§3.3.2–3.3.3) — Qwen3.5-9B with structured `<think>`/`<answer>` generation and a multi-stage output parser enforcing schema, type, label, and share-coherence constraints.
 
 ## Project Structure
 
 ```
-qias_rag_thinking/
-├── config/                 # Configuration
-│   └── rag_config.yaml
-├── data/                   # PDFs, JSON datasets, vector DB
-│   └── pdfs/
-├── docs/                   # Additional documentation
-│   ├── COLAB_*.md, TRAINING_GUIDE.md, etc.
-│   └── PROJECT_ORGANIZATION.md  # How this repo is organized
-├── notebooks/              # Jupyter notebooks (Colab & local)
-│   ├── QIAS_RAG_HF.ipynb
-│   ├── QIAS_RAG_Colab.ipynb
-│   └── Multi_Source_RAG_Evaluation_*.ipynb
-├── outputs/                # Generated artifacts (results, reports)
-│   ├── evaluation/
-│   └── reports/
-├── scripts/                # Runnable entry points (run from project root)
-│   ├── train.py, initialize_rag.py, download_*.py
-│   ├── colab/              # Colab-specific helpers
-│   ├── evaluation/         # Evaluation & report scripts
-│   └── dev/                # Debug, one-off, verification scripts
-├── src/                    # Core library code
-│   ├── rag_pipeline.py
-│   ├── model/, knowledge/, retrieval/, evaluation/, training/
-│   └── ...
-├── tests/                  # Unit and integration tests
-├── requirements.txt
-└── README.md
+qias-mawarith-rag/
+├── pyproject.toml                # Package metadata & dependencies
+├── CITATION.cff                  # Paper citation
+├── config/
+│   └── rag_config.yaml           # Pipeline configuration
+│
+├── qias_mawarith_rag/            # Main package
+│   ├── pipeline.py               # RAGPipeline orchestrator
+│   ├── workers.py                # Multi-GPU inference workers
+│   ├── calculator/               # Symbolic inheritance calculator
+│   ├── datagen/                  # Rule-based synthetic data generator
+│   ├── knowledge/                # PDF processing & vector store
+│   ├── retrieval/                # Hybrid retriever & reranker
+│   ├── generation/               # LLM client, output parser, thinking extractor
+│   ├── evaluation/               # MIR-E wrapper & relevance metrics
+│   └── training/                 # Feedback loop & fine-tuning
+│
+├── scripts/                      # CLI entry points
+│   ├── run_pipeline.py           # Main inference & evaluation
+│   ├── build_prediction.py       # Build submission JSON
+│   └── verify_setup.py           # Environment verification
+│
+├── tests/                        # Pytest test suite
+├── notebooks/                    # Jupyter notebooks (Colab & local)
+└── data/                         # PDFs, datasets, vector DB
 ```
 
-**Run any script from the project root**, e.g.:
+## Installation
+
+### Option 1: Conda (Recommended)
+
+Create a ready-to-use environment from the provided `environment.yaml`:
+
 ```bash
-python scripts/train.py
-python scripts/initialize_rag.py
-python scripts/evaluation/evaluate_relevance.py
-python scripts/dev/verify_setup.py
+# Clone the repository
+git clone https://github.com/swaileh/qias-mawarith-rag.git
+cd qias-mawarith-rag
+
+# Create and activate the conda environment
+conda env create -f environment.yaml
+conda activate qias
+```
+
+### Option 2: Manual Install
+
+```bash
+# Clone the repository
+git clone https://github.com/swaileh/qias-mawarith-rag.git
+cd qias-mawarith-rag
+
+# Create a conda environment (or use virtualenv)
+conda create -n qias python=3.11 -y
+conda activate qias
+
+# Install with GPU support
+pip install -e ".[gpu,dev]"
+
+# Or CPU-only (for the symbolic calculator and data generation)
+pip install -e ".[dev]"
+```
+
+**Requirements:** Python ≥ 3.10, CUDA GPU recommended for LLM inference.
+
+Set up your HuggingFace token for model access:
+```bash
+export HF_TOKEN="your-huggingface-token"
+```
+
+## Quick Start
+
+### Symbolic Calculator (no GPU needed)
+
+```python
+from qias_mawarith_rag.calculator import MiraathCase
+
+# One-liner for simple cases
+result = MiraathCase.quick(["زوج", "أم", ("بنت", 2)])
+print(result)
+
+# Full API with method chaining
+case = MiraathCase(madhab="shafii")
+case.add_heir("زوجة", count=2)
+case.add_heir("ابن")
+case.add_heir("بنت", count=3)
+result = case.calculate()
+```
+
+### RAG Pipeline (GPU required)
+
+```python
+from qias_mawarith_rag.pipeline import RAGPipeline
+
+pipeline = RAGPipeline(config_path="config/rag_config.yaml")
+
+# Build knowledge base
+pipeline.build_knowledge_base(pdf_directory="data/pdfs")
+
+# Query
+result = pipeline.query("مات وترك: أم و أب و بنت. ما هو نصيب كل وريث؟")
+print(result["parsed_output"]["structured_output"])
+```
+
+### Batch Inference
+
+```bash
+# Dev evaluation (with ground truth)
+python scripts/run_pipeline.py --batch --dev-dir /path/to/dev/
+
+# Test inference (submission format)
+python scripts/run_pipeline.py --test --test-file /path/to/test.json
+
+# Multi-GPU acceleration
+python scripts/run_pipeline.py --test --num-gpus 2
+
+# Build submission JSON
+python scripts/build_prediction.py --results-dir ./results
 ```
 
 ## Configuration
 
-Edit `config/rag_config.yaml`:
+All settings are in [`config/rag_config.yaml`](config/rag_config.yaml):
 
-```yaml
-model:
-  client_type: "huggingface"          # Use HuggingFace (not Ollama)
-  hf_model_name: "Qwen/Qwen3.5-9B-Instruct"
-  max_new_tokens: 4096
-  temperature: 0.0
-  enable_thinking: true                 # Enable step-by-step reasoning
+| Parameter | Default | Description |
+|---|---|---|
+| `model.name` | `Qwen/Qwen3.5-9B` | LLM model (HuggingFace) |
+| `model.quantization` | `8bit` | BitsAndBytes quantization |
+| `retrieval.semantic_weight` | `0.7` | Semantic search weight in RRF |
+| `retrieval.keyword_weight` | `0.3` | BM25 keyword weight in RRF |
+| `retrieval.top_k` | `5` | Number of retrieved documents |
+| `retrieval.rerank` | `true` | Enable cross-encoder reranking |
+| `vector_store.chunk_size` | `512` | Document chunk size (tokens) |
 
-vector_store:
-  embedding_model: "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-  chunk_size: 512
-  chunk_overlap: 128
+## Testing
+
+```bash
+python -m pytest tests/ -v
 ```
 
-## Model Details
+## Citation
 
-- **Model**: Qwen/Qwen3.5-9B-Instruct
-- **Size**: ~6.6GB (4-bit quantized)
-- **Context**: 32K tokens
-- **Features**: Thinking mode, Arabic support, Vision capability
-- **Loading**: Downloads automatically from HuggingFace Hub on first run
+If you use this code, please cite:
 
-## Authentication Setup
-
-For optimal performance and higher rate limits, set up HuggingFace authentication:
-
-### Google Colab
-1. Go to `Runtime > Secrets`
-2. Add secret: `HF_TOKEN` = your_token
-3. The notebook will automatically use this token
-
-### Local Development
-1. Copy `.env.example` to `.env`
-2. Set `HF_TOKEN=your_huggingface_token_here`
-3. Or run: `export HF_TOKEN=your_token`
-
-### Manual Setup
-- Run `huggingface-cli login` in terminal
-- Or paste token directly in the notebook
-
-**Get your token from**: https://huggingface.co/settings/tokens
-
-*Note: Without authentication, you'll have lower rate limits but can still use the models.*
-
-## Requirements
-
-- Python 3.10+
-- CUDA-capable GPU (recommended: A100, minimum: T4)
-- 10GB+ GPU memory
-- ~50GB Google Drive storage (for Colab)
-
-## Dependencies
-
-Key packages:
-- `transformers>=5.0.0` - HuggingFace transformers
-- `bitsandbytes>=0.45.0` - 4-bit quantization
-- `accelerate>=1.0.0` - Model loading
-- `chromadb>=1.5.0` - Vector database
-- `sentence-transformers>=5.0.0` - Embeddings
-
-See `requirements.txt` for complete list.
-
-## Usage
-
-### Basic Query
-
-```python
-from src.rag_pipeline import RAGPipeline
-
-# Initialize
-pipeline = RAGPipeline(config_path="config/rag_config.yaml")
-
-# Build knowledge base
-pipeline.build_knowledge_base("./data/pdfs")
-
-# Query
-result = pipeline.query(
-    "مات وترك: أم و أب و بنت. ما هو نصيب كل وريث؟",
-    top_k=5
-)
-
-# View thinking process
-print(result['parsed_output']['thinking'])
-
-# View structured answer
-print(result['parsed_output']['structured_output'])
+```bibtex
+@misc{swaileh2026cvpdqias2026ragguided,
+  title     = {CVPD at QIAS 2026: RAG-Guided LLM Reasoning for Al-Mawarith
+               Share Computation and Heir Allocation},
+  author    = {Wassim Swaileh and Mohammed-En-Nadhir Zighem and Hichem Telli
+               and Salah Eddine Bekhouche and Abdellah Zakaria Sellam
+               and Fadi Dornaika and Dimitrios Kotzinos},
+  year      = {2026},
+  eprint    = {2603.24012},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2603.24012},
+}
 ```
-
-### Training Workflow
-
-See `scripts/colab/colab_training.py` or `notebooks/QIAS_RAG_Training_Colab.ipynb` for complete training workflow.
-
-## Evaluation
-
-The system supports MIR-E evaluation framework:
-
-```python
-from src.evaluation.mir_e_wrapper import MIREvaluator
-
-evaluator = MIREvaluator()
-results = evaluator.evaluate_predictions(
-    predictions_file="results/rag_predictions.json",
-    reference_file="data/qias_dataset.json"
-)
-
-print(f"MIR-E Score: {results['average_mir_e']:.4f}")
-```
-
-## Troubleshooting
-
-### Authentication Issues
-- **"HF_TOKEN timed out"**: You're not in actual Colab UI - use manual token input or `.env` file
-- **"No HF_TOKEN found"**: Set up authentication using one of the methods above
-- **Rate limits exceeded**: Set up HuggingFace token for higher limits
-
-### Model Loading Issues
-- **Out of memory**: Reduce `max_new_tokens` or use smaller model
-- **Slow loading**: First download takes 5-10 minutes, subsequent loads are faster
-- **Download fails**: Check HuggingFace Hub access and internet connection
-
-### GPU Issues
-- **CUDA out of memory**: Enable 4-bit quantization (already default)
-- **No GPU detected**: Check CUDA installation and GPU availability
-
-### Performance Issues
-- **Slow inference**: Use A100 GPU instead of T4
-- **Low accuracy**: Add more PDF books to knowledge base
-
-## Documentation
-
-- `docs/COLAB_TRAINING_USAGE.md` - Colab usage guide
-- `docs/TRAINING_GUIDE.md` - Complete training workflow
-- `docs/QIAS_TRAIN_SET_ENHANCEMENT_REPORT.md` - Dataset enhancement report
-- `docs/PROJECT_ORGANIZATION.md` - How the workspace is organized
 
 ## License
 
-This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**. You may use, share, and adapt it for non-commercial purposes with attribution. Commercial use is not permitted. See the [LICENSE](LICENSE) file for the full text.
-
-## Contact
-
-**Wassim Swaileh**
-- `web page:` https://swaileh.github.io/index.html
----
-
-
+This project is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).

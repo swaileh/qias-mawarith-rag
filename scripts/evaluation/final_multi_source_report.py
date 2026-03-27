@@ -363,8 +363,8 @@ def main():
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write(report)
 
-    print(f"\n[CHECK] Final comprehensive report generated!")
-    print(f"[CHART] Analysis covers 100 questions across 3 source configurations")
+    print("\n[CHECK] Final comprehensive report generated!")
+    print("[CHART] Analysis covers 100 questions across 3 source configurations")
     print(f"[FOLDER] Report saved to: {report_file}")
     print("\n" + "="*80)
     print("[CELEBRATE] MULTI-SOURCE RAG EVALUATION COMPLETE")

@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qias-mawarith-rag"
+version = "2.0.0"
+description = "RAG-Guided LLM Reasoning for Al-Mawarith Share Computation and Heir Allocation"
+readme = "README.md"
+license = {text = "CC-BY-NC-4.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Wassim Swaileh"},
+    {name = "Mohammed-En-Nadhir Zighem"},
+    {name = "Hichem Telli"},
+    {name = "Salah Eddine Bekhouche"},
+    {name = "Abdellah Zakaria Sellam"},
+    {name = "Fadi Dornaika"},
+    {name = "Dimitrios Kotzinos"},
+]
+keywords = [
+    "islamic-inheritance", "mawarith", "rag", "llm",
+    "arabic-nlp", "legal-reasoning", "qwen",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Core
+    "numpy>=2.0.0",
+    "pandas>=2.0.0",
+    "tqdm>=4.60.0",
+    "sympy>=1.12",
+    "jsonschema>=4.20.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "PyYAML>=6.0.0",
+    # Vector Store & Embeddings
+    "chromadb>=0.4.0",
+    "sentence-transformers>=3.0.0",
+    # PDF Processing
+    "PyMuPDF>=1.24.0",
+    "pdfplumber>=0.11.0",
+    "arabic-reshaper>=3.0.0",
+    "python-bidi>=0.6.0",
+    # Retrieval & NLP
+    "rank-bm25>=0.2.2",
+    "transformers>=4.40.0",
+    "tokenizers>=0.20.0",
+    "nltk>=3.8.0",
+    "scikit-learn>=1.4.0",
+    # HuggingFace
+    "huggingface-hub>=0.25.0",
+    "requests>=2.32.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "torch>=2.5.0",
+    "bitsandbytes>=0.45.0",
+    "accelerate>=1.0.0",
+]
+colab = [
+    "ipywidgets>=8.1.0",
+    "plotly>=5.20.0",
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.0",
+]
+search = [
+    "tavily-python>=0.5.0",
+    "faiss-cpu>=1.9.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/swaileh/qias-mawarith-rag"
+Paper = "https://arxiv.org/abs/2603.24012"
+
+[project.scripts]
+qias-predict = "scripts.run_pipeline:main"
+qias-build = "scripts.build_prediction:main"
+
+[tool.setuptools.packages.find]
+include = ["qias_mawarith_rag*"]
+exclude = ["tests*", "scripts*", "notebooks*", "data*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100

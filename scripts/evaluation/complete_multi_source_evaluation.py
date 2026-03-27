@@ -7,11 +7,9 @@ Analyzes both dev set files (200 questions total) with comprehensive reporting
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 from datetime import datetime
 import re
-from collections import defaultdict
 import os
 
 def main():
@@ -369,7 +367,7 @@ def display_performance_summary(evaluation_results, evaluator):
         source_name = evaluator.source_configs[source_key]['name']
         print(f"   {i}. {source_name}: {score:.3f}")
 
-    print(f"\n[UP-CHART] DETAILED METRICS:")
+    print("\n[UP-CHART] DETAILED METRICS:")
     print(f"{'Configuration':<20} {'Combined':<10} {'Semantic':<10} {'Keyword':<10} {'Success %':<10}")
     print("-" * 70)
 
@@ -529,7 +527,7 @@ def generate_comprehensive_recommendations(evaluation_results, evaluator):
         print("- Best performance on complex inheritance scenarios")
     else:
         print("\nWhy Web Search Only?")
-        print(f"- Broadest coverage and most current information")
+        print("- Broadest coverage and most current information")
         print("- Best keyword matching for diverse query types")
 
     # Use case recommendations

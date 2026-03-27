@@ -6,8 +6,8 @@ Demonstrates how to evaluate the relevance of retrieved documents to queries
 
 import json
 from pathlib import Path
-from src.rag_pipeline import RAGPipeline
-from src.evaluation.relevance_evaluator import print_relevance_report
+from qias_mawarith_rag.pipeline import RAGPipeline
+from qias_mawarith_rag.evaluation.relevance_evaluator import print_relevance_report
 
 
 def main():

@@ -4,16 +4,10 @@ Demonstrates complete training workflow
 """
 
 import json
-import sys
 from pathlib import Path
 
-# Add project root to path (script lives in scripts/)
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-from src.rag_pipeline import RAGPipeline
-from src.training.feedback_loop import FeedbackLoop
-from src.evaluation.mir_e_wrapper import MIREvaluator
+from qias_mawarith_rag.pipeline import RAGPipeline
+from qias_mawarith_rag.training.feedback_loop import FeedbackLoop
 
 
 def main():
@@ -99,7 +93,7 @@ def main():
     print("4. Once satisfied, run full evaluation on test set")
     print("5. If >99% precision achieved, deploy to production")
     print("\nFor fine-tuning (optional):")
-    print("  python -c 'from src.training.fine_tune import FineTuner; ft=FineTuner(); ft.save_training_script()'")
+    print("  python -c 'from qias_mawarith_rag.training.fine_tune import FineTuner; ft=FineTuner(); ft.save_training_script()'")
 
 
 if __name__ == "__main__":

@@ -3,15 +3,18 @@ colab:
   google_drive_mount: /content/drive
   results_path_in_drive: MyDrive/QIAS_RAG/results
 evaluation:
-  dataset_path: ../qias_shared_task_2026/data/jsonl/mawarith
+  dataset_path: /mnt/salah/qias/data/dev # TODO: Fix me
   mir_e_evaluation: true
   output_directory: ./results
+  enable_relevance_evaluation: true
+  min_relevance_threshold: 0.5
+  evaluation_output_dir: ./evaluation_results
 model:
   client_type: huggingface
   context_window: 32768
   enable_thinking: true
   hf_model_name: Qwen/Qwen3.5-9B
-  max_new_tokens: 1024
+  max_new_tokens: 4096 #1024 #TODO: Fix me
   name: Qwen3.5-9B-HF
   temperature: 0.1
   repetition_penalty: 1.15
@@ -60,7 +63,3 @@ web_search:
   enabled: false
   max_results: 3
   search_language: ar
-evaluation:
-  enable_relevance_evaluation: true
-  min_relevance_threshold: 0.5
-  evaluation_output_dir: ./evaluation_results

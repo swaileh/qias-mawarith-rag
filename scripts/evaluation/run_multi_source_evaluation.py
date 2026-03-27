@@ -7,12 +7,9 @@ Reproduce the comprehensive analysis of PDF vs Web vs Combined sources
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 from pathlib import Path
 from datetime import datetime
 import re
-from collections import defaultdict
 
 def load_qias_dev_dataset(file_path: str) -> list:
     """Load the QIAS dev dataset"""

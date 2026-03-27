@@ -3,7 +3,8 @@ Initialize RAG Pipeline for QIAS Islamic Law Reasoning
 Local Windows version of the Colab initialization script
 """
 
-import sys, os, yaml
+import sys
+import yaml
 from pathlib import Path
 
 # Project root (parent of scripts/)
@@ -36,11 +37,8 @@ def initialize_rag_pipeline():
 
     print('Config updated: Qwen/Qwen3.5-9B via HuggingFace (thinking enabled)')
 
-    # Add project root to Python path
-    sys.path.insert(0, str(PROJECT_ROOT))
-
     try:
-        from src.rag_pipeline import RAGPipeline
+        from qias_mawarith_rag.pipeline import RAGPipeline
 
         print('\nLoading Qwen3.5 from HuggingFace...')
         pipeline = RAGPipeline(config_path=str(config_path))

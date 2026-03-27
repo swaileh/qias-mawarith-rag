@@ -4,11 +4,9 @@ RAG Relevance Evaluation Report Generator
 Comprehensive analysis of RAG retrieval quality for Islamic inheritance law
 """
 
-import json
 import numpy as np
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 # Sample evaluation data based on typical RAG performance
 # This simulates what the evaluation system would produce
@@ -330,7 +328,7 @@ def main():
     # Save to file
     saved_file = save_report_to_file(report)
 
-    print(f"\n[CHECK] Report generation complete!")
+    print("\n[CHECK] Report generation complete!")
     print(f"[CHART] Analyzed {len(SAMPLE_EVALUATION_DATA['evaluation_results'])} questions")
     print(f"[FOLDER] Full report saved to: {saved_file}")
 

@@ -7,7 +7,6 @@ for enhancing the QIAS train set distribution weaknesses in:
 """
 
 import requests
-import os
 from pathlib import Path
 import time
 
@@ -96,10 +95,10 @@ def download_pdf(url, output_path, description, timeout=60):
         print(f"  HTTP Error: {e.response.status_code}")
         return False
     except requests.exceptions.ConnectionError:
-        print(f"  Connection Error")
+        print("  Connection Error")
         return False
     except requests.exceptions.Timeout:
-        print(f"  Timeout Error")
+        print("  Timeout Error")
         return False
     except Exception as e:
         print(f"  Error: {str(e)[:60]}")
@@ -132,14 +131,14 @@ def try_download_with_delay(resources, output_dir, delay=2):
 
 def main():
     # Output directory
-    output_dir = Path("C:/Users/Wassim-Swaileh-SW07/projects/Qias/qias_rag_thinking/data/pdfs")
+    output_dir = Path(__file__).resolve().parent.parent / "data" / "pdfs"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 70)
     print("QIAS ARABIC ISLAMIC INHERITANCE PDF DOWNLOADER")
     print("=" * 70)
     print(f"Output Directory: {output_dir}")
-    print(f"Focus: Arabic books only (Awl/Radd cases)")
+    print("Focus: Arabic books only (Awl/Radd cases)")
     print("=" * 70)
 
     # Download primary resources

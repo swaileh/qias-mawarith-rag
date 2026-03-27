@@ -13,7 +13,6 @@ Steps:
 import os
 import sys
 import json
-import time
 from pathlib import Path
 from typing import Dict, Any, List
 
@@ -105,7 +104,7 @@ def step1_build_knowledge_base(pipeline, pdf_directory: str) -> Dict[str, Any]:
         # Get stats
         stats = pipeline.vector_store.get_collection_stats()
         print("\n✓ Knowledge base built successfully!")
-        print(f"\nKnowledge Base Statistics:")
+        print("\nKnowledge Base Statistics:")
         print(f"  Total documents: {stats.get('total_documents', 0)}")
         print(f"  Sample sources: {stats.get('sample_sources', [])}")
         
@@ -469,8 +468,8 @@ def run_training_workflow(config_path: str = "config/rag_config.yaml",
     
     # Imports
     print("\n--- Importing RAG Components ---")
-    from src.rag_pipeline import RAGPipeline
-    from src.training.feedback_loop import FeedbackLoop
+    from qias_mawarith_rag.pipeline import RAGPipeline
+    from qias_mawarith_rag.training.feedback_loop import FeedbackLoop
     print("✓ Imports successful")
     
     # Initialize pipeline
@@ -568,26 +567,26 @@ def run_training_workflow(config_path: str = "config/rag_config.yaml",
     print("\n" + "="*80)
     print("TRAINING WORKFLOW COMPLETE - SUMMARY REPORT")
     print("="*80)
-    print(f"\n📊 Baseline Performance:")
+    print("\n📊 Baseline Performance:")
     print(f"   Success Rate: {baseline_result['metrics']['success_rate']*100:.2f}%")
     print(f"   Avg Thinking Quality: {baseline_result['metrics']['avg_thinking_quality']:.2f}")
     
-    print(f"\n📈 Training Progress:")
+    print("\n📈 Training Progress:")
     print(f"   Best Iteration: {iteration_result['best_iteration']}")
     print(f"   Best Score: {iteration_result['best_score']*100:.2f}%")
     
-    print(f"\n🎯 Final Test Results:")
+    print("\n🎯 Final Test Results:")
     if final_result['status'] == 'success':
         print(f"   Success Rate: {final_result['success_rate']*100:.2f}%")
         print(f"   Improvement: {final_result['improvement']*100:+.2f}%")
         print(f"   Avg Thinking Quality: {final_result['avg_thinking_quality']:.2f}")
     
-    print(f"\n📋 Files Generated:")
-    print(f"   - error_analysis_baseline.json")
-    print(f"   - error_analysis_iter_1.json")
-    print(f"   - error_analysis_iter_2.json")
-    print(f"   - error_analysis_iter_3.json")
-    print(f"   - rag_predictions.json")
+    print("\n📋 Files Generated:")
+    print("   - error_analysis_baseline.json")
+    print("   - error_analysis_iter_1.json")
+    print("   - error_analysis_iter_2.json")
+    print("   - error_analysis_iter_3.json")
+    print("   - rag_predictions.json")
     
     print("\n" + "="*80)
     print("Next Steps:")
