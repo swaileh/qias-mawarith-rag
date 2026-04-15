@@ -37,19 +37,27 @@ _ensure_nltk_data()
 class RelevanceEvaluator:
     """Comprehensive relevance evaluation for RAG systems"""
 
-    def __init__(self, config_path: str = "config/rag_config.yaml"):
+    def __init__(
+        self,
+        config_path: str = "config/rag_config.yaml",
+        embedding_model: Optional[SentenceTransformer] = None
+    ):
         """Initialize relevance evaluator"""
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
 
         # Initialize semantic similarity model
-        embedding_model = self.config.get('vector_store', {}).get(
+        embedding_model_name = self.config.get('vector_store', {}).get(
             'embedding_model',
             'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
         )
 
-        print(f"Loading embedding model for relevance evaluation: {embedding_model}")
-        self.embedding_model = SentenceTransformer(embedding_model)
+        if embedding_model is not None:
+            self.embedding_model = embedding_model
+            print("Using shared embedding model for relevance evaluation")
+        else:
+            print(f"Loading embedding model for relevance evaluation: {embedding_model_name}")
+            self.embedding_model = SentenceTransformer(embedding_model_name)
 
         # Initialize TF-IDF vectorizer
         self.tfidf_vectorizer = TfidfVectorizer(
@@ -109,10 +117,19 @@ class RelevanceEvaluator:
         if not retrieved_docs:
             return evaluation
 
+        semantic_scores = self._batch_semantic_similarity(query, retrieved_docs)
+        tfidf_scores = self._batch_tfidf_similarity(query, retrieved_docs)
+
         # Evaluate each retrieved document
         doc_scores = []
         for i, doc in enumerate(retrieved_docs):
-            doc_eval = self._evaluate_single_document(query, doc, i)
+            doc_eval = self._evaluate_single_document(
+                query,
+                doc,
+                i,
+                semantic_similarity=semantic_scores[i] if i < len(semantic_scores) else 0.0,
+                tfidf_similarity=tfidf_scores[i] if i < len(tfidf_scores) else 0.0
+            )
             doc_scores.append(doc_eval)
 
         evaluation['document_scores'] = doc_scores
@@ -160,7 +177,9 @@ class RelevanceEvaluator:
         self,
         query: str,
         document: Dict[str, Any],
-        rank: int
+        rank: int,
+        semantic_similarity: Optional[float] = None,
+        tfidf_similarity: Optional[float] = None
     ) -> Dict[str, Any]:
         """Evaluate relevance of a single document to the query"""
 
@@ -180,13 +199,17 @@ class RelevanceEvaluator:
         }
 
         # Semantic similarity using embeddings
-        evaluation['semantic_similarity'] = self._calculate_semantic_similarity(query, doc_content)
+        if semantic_similarity is None:
+            semantic_similarity = self._calculate_semantic_similarity(query, doc_content)
+        evaluation['semantic_similarity'] = semantic_similarity
 
         # Keyword overlap analysis
         evaluation['keyword_overlap'] = self._calculate_keyword_overlap(query, doc_content)
 
         # TF-IDF similarity
-        evaluation['tfidf_similarity'] = self._calculate_tfidf_similarity(query, doc_content)
+        if tfidf_similarity is None:
+            tfidf_similarity = self._calculate_tfidf_similarity(query, doc_content)
+        evaluation['tfidf_similarity'] = tfidf_similarity
 
         # Combined relevance score
         evaluation['combined_score'] = self._calculate_combined_score(evaluation)
@@ -203,6 +226,26 @@ class RelevanceEvaluator:
         except Exception as e:
             print(f"Error calculating semantic similarity: {e}")
             return 0.0
+
+    def _batch_semantic_similarity(
+        self,
+        query: str,
+        retrieved_docs: List[Dict[str, Any]]
+    ) -> List[float]:
+        """Calculate semantic similarity for all retrieved docs in one embedding pass."""
+        if not retrieved_docs:
+            return []
+
+        try:
+            doc_contents = [doc.get('content', '') for doc in retrieved_docs]
+            embeddings = self.embedding_model.encode([query] + doc_contents)
+            query_embedding = embeddings[0]
+            doc_embeddings = embeddings[1:]
+            similarities = cosine_similarity([query_embedding], doc_embeddings)[0]
+            return [float(score) for score in similarities]
+        except Exception as e:
+            print(f"Error calculating batch semantic similarity: {e}")
+            return [0.0] * len(retrieved_docs)
 
     def _calculate_keyword_overlap(self, query: str, document: str) -> Dict[str, Any]:
         """Calculate keyword overlap between query and document"""
@@ -280,6 +323,25 @@ class RelevanceEvaluator:
         except Exception as e:
             print(f"Error calculating TF-IDF similarity: {e}")
             return 0.0
+
+    def _batch_tfidf_similarity(
+        self,
+        query: str,
+        retrieved_docs: List[Dict[str, Any]]
+    ) -> List[float]:
+        """Calculate TF-IDF cosine similarity for all docs in one fit/transform pass."""
+        if not retrieved_docs:
+            return []
+
+        try:
+            doc_contents = [doc.get('content', '') for doc in retrieved_docs]
+            texts = [query] + doc_contents
+            tfidf_matrix = self.tfidf_vectorizer.fit_transform(texts)
+            similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
+            return [float(score) for score in similarities]
+        except Exception as e:
+            print(f"Error calculating batch TF-IDF similarity: {e}")
+            return [0.0] * len(retrieved_docs)
 
     def _calculate_combined_score(self, doc_evaluation: Dict[str, Any]) -> float:
         """Calculate combined relevance score"""

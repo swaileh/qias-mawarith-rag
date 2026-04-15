@@ -67,6 +67,9 @@ gpu = [
     "bitsandbytes>=0.45.0",
     "accelerate>=1.0.0",
 ]
+unsloth = [
+    "unsloth",
+]
 colab = [
     "ipywidgets>=8.1.0",
     "plotly>=5.20.0",

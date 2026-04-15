@@ -142,14 +142,47 @@ python scripts/run_pipeline.py --test --num-gpus 2
 python scripts/build_prediction.py --results-dir ./results
 ```
 
+## Google Colab (Option C)
+
+Use `notebooks/QIAS_RAG_Colab.ipynb` to run the full pipeline on Colab.
+For a faster smoke-test path, use `notebooks/QIAS_RAG_Minimal_Colab.ipynb`.
+
+- Supports only `huggingface` (default) or `unsloth` backends.
+- Does not require or use Ollama.
+- Includes Drive mount, dependency install, backend config update, knowledge-base build, and a latency smoke test cell.
+
+Recommended backend choice:
+
+- `huggingface`: most stable default for Colab runs.
+- `unsloth`: optional GPU path (requires CUDA runtime and compatible torch/unsloth stack).
+
+Quick Colab flow:
+
+1. Open `notebooks/QIAS_RAG_Colab.ipynb` in Colab.
+2. Set `CLIENT_TYPE = "huggingface"` or `CLIENT_TYPE = "unsloth"`.
+3. Run all cells in order.
+4. Use the included smoke benchmark cell to capture end-to-end latency.
+
+Minimal notebook flow:
+
+1. Open `notebooks/QIAS_RAG_Minimal_Colab.ipynb` in Colab.
+2. Keep `CLIENT_TYPE = "huggingface"` for stable first run (or switch to `unsloth` on GPU).
+3. Run all cells to get one-query latency and parser/validation status.
+
 ## Configuration
 
 All settings are in [`config/rag_config.yaml`](config/rag_config.yaml):
 
 | Parameter | Default | Description |
-|---|---|---|
-| `model.name` | `Qwen/Qwen3.5-9B` | LLM model (HuggingFace) |
-| `model.quantization` | `8bit` | BitsAndBytes quantization |
+| --- | --- | --- |
+| `model.client_type` | `unsloth` | Inference backend: `unsloth`, `huggingface`, or `ollama` |
+| `model.hf_model_name` | `Qwen/Qwen3.5-9B` | HuggingFace model ID |
+| `model.unsloth_model_name` | `Qwen/Qwen3.5-9B` | Model loaded through Unsloth |
+| `model.unsloth_load_in_4bit` | `true` | Enable 4-bit loading for Unsloth |
+| `model.max_new_tokens` | `1024` | Generation length cap (latency/quality tradeoff) |
+| `model.context_window` | `8192` | Ollama context limit used by `Qwen3Client` |
+| `evaluation.enable_relevance_evaluation` | `false` | Disable expensive per-query relevance scoring in production |
+| `evaluation.dataset_path` | `./data/dev` | Portable local dev dataset path |
 | `retrieval.semantic_weight` | `0.7` | Semantic search weight in RRF |
 | `retrieval.keyword_weight` | `0.3` | BM25 keyword weight in RRF |
 | `retrieval.top_k` | `5` | Number of retrieved documents |

@@ -23,6 +23,7 @@ from qias_mawarith_rag.evaluation.relevance_evaluator import RelevanceEvaluator
 # Import model client based on config
 from qias_mawarith_rag.generation.qwen_hf_client import QwenHFClient
 from qias_mawarith_rag.generation.qwen3_client import Qwen3Client
+from qias_mawarith_rag.generation.unsloth_client import UnslothClient
 
 
 class RAGPipeline:
@@ -43,13 +44,25 @@ class RAGPipeline:
         self.retriever = HybridRetriever(config_path)
         self.reranker = Reranker(config_path)
         self.prompt_builder = PromptBuilder(config_path)
-        self.relevance_evaluator = RelevanceEvaluator(config_path)
+        self.enable_relevance_evaluation = self.config.get("evaluation", {}).get(
+            "enable_relevance_evaluation",
+            True
+        )
+        self.relevance_evaluator = None
+        if self.enable_relevance_evaluation:
+            self.relevance_evaluator = RelevanceEvaluator(
+                config_path,
+                embedding_model=self.vector_store.embedding_model
+            )
 
         # Choose model client based on config
         client_type = self.config['model'].get('client_type', 'ollama')
         if client_type == 'huggingface':
             print("Using HuggingFace Transformers for Qwen3.5...")
             self.qwen_client = QwenHFClient(config_path)
+        elif client_type == "unsloth":
+            print("Using Unsloth for model inference...")
+            self.qwen_client = UnslothClient(config_path)
         else:
             print("Using Ollama for model inference...")
             self.qwen_client = Qwen3Client(config_path)
@@ -296,12 +309,13 @@ class RAGPipeline:
             retrieved_docs = self.reranker.rerank(question, retrieved_docs, top_k=top_k)
             result['retrieved_docs'] = retrieved_docs
 
-            # Evaluate relevance of retrieved documents
-            print("Evaluating retrieval relevance...")
-            relevance_eval = self.relevance_evaluator.evaluate_query_relevance(
-                question, retrieved_docs
-            )
-            result['relevance_evaluation'] = relevance_eval
+            # Evaluate relevance only when enabled (expensive path)
+            if self.enable_relevance_evaluation and self.relevance_evaluator:
+                print("Evaluating retrieval relevance...")
+                relevance_eval = self.relevance_evaluator.evaluate_query_relevance(
+                    question, retrieved_docs
+                )
+                result['relevance_evaluation'] = relevance_eval
         
         # Optional web search
         web_search_formatted = None
@@ -364,6 +378,12 @@ class RAGPipeline:
         Returns:
             Comprehensive relevance evaluation
         """
+        if not self.relevance_evaluator:
+            return {
+                "query": question,
+                "num_retrieved": len(retrieved_docs),
+                "error": "Relevance evaluation is disabled in configuration"
+            }
         return self.relevance_evaluator.evaluate_query_relevance(
             question, retrieved_docs, ground_truth_docs
         )
