@@ -163,7 +163,7 @@ Quick Colab flow:
 3. Run all cells in order.
 4. Use the included smoke benchmark cell to capture end-to-end latency.
 
-Minimal notebook flow:
+Minimal notebook flow: (measuring latency)
 
 1. Open `notebooks/QIAS_RAG_Minimal_Colab.ipynb` in Colab.
 2. Keep `CLIENT_TYPE = "huggingface"` for stable first run (or switch to `unsloth` on GPU).
