@@ -347,6 +347,40 @@ class RAGPipeline:
         # Parse output
         print("Parsing output...")
         parsed = self.output_parser.parse(raw_output)
+
+        # If thinking is required but missing, retry once with stricter format hint.
+        # This improves compliance with QIAS "<think>...</think><answer>...</answer>" outputs.
+        require_thinking = bool(self.config.get('model', {}).get('enable_thinking', False))
+        retry_on_missing_thinking = bool(
+            self.config.get('model', {}).get('retry_on_missing_thinking', True)
+        )
+        if (
+            require_thinking
+            and retry_on_missing_thinking
+            and not parsed.get('thinking', '').strip()
+        ):
+            print("No <think> section detected. Retrying generation once with stricter tags...")
+            retry_prompt = (
+                prompt
+                + "\n\n[FORMAT REQUIREMENT - STRICT]\n"
+                + "يجب أن يكون الرد بالكامل داخل قسمين فقط وبالترتيب التالي:\n"
+                + "<think>...خطوات التفكير التفصيلية...</think>\n"
+                + "<answer>...الإجابة النهائية...</answer>\n"
+                + "لا تكتب أي نص خارج هذين الوسمين.\n"
+            )
+            try:
+                retry_output = self.qwen_client.generate(retry_prompt)
+                retry_parsed = self.output_parser.parse(retry_output)
+                if retry_parsed.get('thinking', '').strip():
+                    print("Retry successful: thinking section captured.")
+                    raw_output = retry_output
+                    parsed = retry_parsed
+                    result['raw_output'] = retry_output
+                else:
+                    print("Retry completed but thinking section is still missing.")
+            except Exception as e:
+                print(f"Retry generation failed: {e}")
+
         result['parsed_output'] = parsed
         
         # Analyze thinking quality

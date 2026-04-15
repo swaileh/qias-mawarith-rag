@@ -142,7 +142,7 @@ python scripts/run_pipeline.py --test --num-gpus 2
 python scripts/build_prediction.py --results-dir ./results
 ```
 
-## Google Colab (Option C)
+## Google Colab
 
 Use `notebooks/QIAS_RAG_Colab.ipynb` to run the full pipeline on Colab.
 For a faster smoke-test path, use `notebooks/QIAS_RAG_Minimal_Colab.ipynb`.
